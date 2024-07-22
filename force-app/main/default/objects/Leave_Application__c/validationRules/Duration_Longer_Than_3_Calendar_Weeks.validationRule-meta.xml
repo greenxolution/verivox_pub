@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Duration_Longer_Than_3_Calendar_Weeks</fullName>
+    <active>true</active>
+    <description>Ensures the duration is not longer than 3 calendar weeks.</description>
+    <errorConditionFormula>(End_Date__c - Start_Date__c) &gt; 21</errorConditionFormula>
+    <errorMessage>Duration cannot be longer than 3 calendar weeks.</errorMessage>
+</ValidationRule>
