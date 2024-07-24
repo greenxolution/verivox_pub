@@ -120,3 +120,56 @@ Here are detailed test scenarios and steps to automate the validation of the req
 ### Summary
 
 This approach outlines test scenarios and steps for automating the validation of leave management requirements in Salesforce, ensuring comprehensive coverage of both functional and integration aspects.
+
+
+### Test Scenarios for `DurationCalculator` Class
+
+When writing test scenarios for the `DurationCalculator` class, we need to ensure that we cover all possible edge cases and regular use cases. Here are the key scenarios to test:
+
+#### 1. Basic Working Days Calculation
+- **Scenario**: Calculate working days between two dates that do not include any weekends or German holidays.
+- **Expected Result**: The number of working days should be the total days between the start and end dates.
+
+#### 2. Including Weekends
+- **Scenario**: Calculate working days between two dates that include weekends.
+- **Expected Result**: Weekends should be excluded from the count of working days.
+
+#### 3. Including German Holidays
+- **Scenario**: Calculate working days between two dates that include German holidays.
+- **Expected Result**: German holidays should be excluded from the count of working days.
+
+#### 4. Including Both Weekends and German Holidays
+- **Scenario**: Calculate working days between two dates that include both weekends and German holidays.
+- **Expected Result**: Both weekends and German holidays should be excluded from the count of working days.
+
+#### 5. Edge Case: Start Date Equals End Date
+- **Scenario**: The start date is the same as the end date, and it is a working day.
+- **Expected Result**: The number of working days should be 1 if the date is not a weekend or a German holiday.
+
+#### 6. Edge Case: Start Date Equals End Date and It Is a Weekend
+- **Scenario**: The start date is the same as the end date, and it is a weekend.
+- **Expected Result**: The number of working days should be 0.
+
+#### 7. Edge Case: Start Date Equals End Date and It Is a German Holiday
+- **Scenario**: The start date is the same as the end date, and it is a German holiday.
+- **Expected Result**: The number of working days should be 0.
+
+#### 8. Date Range Spanning Over Multiple Months
+- **Scenario**: Calculate working days between two dates that span over multiple months.
+- **Expected Result**: Working days should be accurately calculated across month boundaries, excluding weekends and German holidays.
+
+#### 9. Entire Date Range is Weekends and/or German Holidays
+- **Scenario**: The entire date range consists of weekends and/or German holidays.
+- **Expected Result**: The number of working days should be 0.
+
+#### 10. Empty Holiday List
+- **Scenario**: There are no German holidays configured.
+- **Expected Result**: Only weekends should be excluded from the count of working days.
+
+### Example Test Class
+
+Here is a test class covering the above scenarios:
+
+### Summary
+
+This test class covers a variety of scenarios for the `DurationCalculator` class, ensuring that it correctly calculates the number of working days while considering weekends, German holidays, and different date ranges. The `testSetup` method ensures that necessary data, such as German holidays, is set up before running the tests.

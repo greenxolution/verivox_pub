@@ -1,6 +1,6 @@
 trigger LeaveApplicationTrigger on Leave_Application__c (before insert, after insert, before update, after update, before delete, after delete) {
 
-    TriggerHandlerFactory factory = new AccountTriggerHandlerFactory();
+    TriggerHandlerFactory factory = new LeaveApplicatonTriggerHandlerFactory();
     ITriggerHandler handler = factory.createHandler();
     TriggerOperation operation;
     

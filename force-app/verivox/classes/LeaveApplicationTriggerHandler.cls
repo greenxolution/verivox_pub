@@ -35,6 +35,10 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
                 
                 handleAfterDelete(oldRecords);
             }
+            when AFTER_INSERT {		
+                
+                handleAfterInsert(newRecords);
+            }
             when else {		  
 
                 System.debug('TriggerOperation.else');
@@ -43,11 +47,30 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     }
     
     private void handleBeforeInsert(List<SObject> newRecords) {
-        // Logic for before insert
+        List<Leave_Application__c> leaveApplications = (List<Leave_Application__c>) newRecords;
+
+        Leave_Policy_Config__mdt leavePolicyConfig = getLeavePolicyConfigs();
+
+        if (leavePolicyConfig == null) {
+            leaveApplications[0].addError('Leave policy configuration is missing.');
+            return;
+        }
+
+        for (Leave_Application__c leaveApplication : leaveApplications) {
+            
+            // Set Duration
+            leaveApplication.Duration__c = getDurationCalculation(leaveApplication.Start_Date__c, leaveApplication.End_Date__c);
+
+            // Validate Maximun Leave Duration Date
+            if (leaveApplication.Duration__c > leavePolicyConfig.MaximumLeaveDurationinDays__c) {
+                leaveApplication.addError('Leave duration cannot exceed ' + leavePolicyConfig.MaximumLeaveDurationinDays__c + ' days.');
+            }
+        }
     }
     
     private void handleAfterInsert(List<SObject> newRecords) {
         // Logic for after insert
+        setLeftoverVacationField(newRecords);
     }
     
     private void handleBeforeUpdate(List<SObject> oldRecords, List<SObject> newRecords) {
@@ -56,6 +79,7 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     
     private void handleAfterUpdate(List<SObject> oldRecords, List<SObject> newRecords) {
         // Logic for after update
+        setLeftoverVacationField(newRecords);
     }
     
     private void handleBeforeDelete(List<SObject> oldRecords) {
@@ -64,5 +88,91 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     
     private void handleAfterDelete(List<SObject> oldRecords) {
         // Logic for after delete
+        setLeftoverVacationField(oldRecords);
     }
+
+    @TestVisible
+    private Integer getDurationCalculation(Date startDate, Date endDate) {
+        DurationCalculator calculator = new DurationCalculator();
+        return calculator.calculateWorkingDays(startDate, endDate);
+    }
+
+
+    @TestVisible
+    private static Leave_Policy_Config__mdt getLeavePolicyConfigs() {
+        return [SELECT Id, MaximumLeaveDurationinDays__c, TotalVacationDaysPerYear__c FROM Leave_Policy_Config__mdt LIMIT 1];
+    }
+
+
+
+    // Set User.Leftover_Vacation__c in insert, update and delete scenarios
+    @TestVisible
+    private void setLeftoverVacationField(List<SObject> newRecords) {
+        // Create a set of user IDs from the new leave applications
+        Set<Id> userIds = new Set<Id>();
+        List<User> usersToUpdate = new List<User>();
+
+        for (Leave_Application__c leaveApplication : (List<Leave_Application__c>) newRecords) {
+            userIds.add(leaveApplication.User__c);
+        }
+    
+        // Query users with the total vacation days field
+        Map<Id, User> usersMap = new Map<Id, User>([
+            SELECT Id, Leftover_Vacation__c
+            FROM User
+            WHERE Id IN :userIds
+        ]);
+    
+        // Query approved leave applications for these users to calculate used vacation days
+        AggregateResult[] aggregateResults = [SELECT User__c, SUM(Duration__c) Duration__c
+                                              FROM Leave_Application__c
+                                              WHERE Status__c = 'Approved'
+                                              AND User__c IN :userIds
+                                              GROUP BY User__c];
+    
+        // Create a map to store used vacation days
+        Map<Id, Decimal> usedVacationDaysMap = new Map<Id, Decimal>();
+        for (AggregateResult ar : aggregateResults) {
+            usedVacationDaysMap.put((Id)ar.get('User__c'), (Decimal)ar.get('Duration__c'));
+        }
+    
+        Decimal allowedVacationDays = getLeavePolicyConfigs().TotalVacationDaysPerYear__c;
+        // Calculate and set the leftover vacation days for each user
+        Map<Id, Decimal> leftoverVacationDaysMap = new Map<Id, Decimal>();
+        for (Leave_Application__c leaveApplication : (List<Leave_Application__c>) newRecords) {
+            User user = usersMap.get(leaveApplication.User__c);
+            Decimal usedVacationDays = usedVacationDaysMap.containsKey(user.Id) ? usedVacationDaysMap.get(user.Id) : 0;
+            
+            Decimal remainingVacationDays = leftoverVacationDaysMap.containsKey(user.Id) ? leftoverVacationDaysMap.get(user.Id) : allowedVacationDays;
+            remainingVacationDays -= leaveApplication.Duration__c;
+            leftoverVacationDaysMap.put(user.Id, remainingVacationDays);
+            Decimal leftoverVacationDays = allowedVacationDays - usedVacationDays;
+            if(leftoverVacationDays < 0) {
+                leaveApplication.addError('Leftover vacation days cannot exceed ' + allowedVacationDays + ' days.');
+                return;
+            }
+
+            leftoverVacationDaysMap.put(user.Id, leftoverVacationDays);
+        }
+
+        // Update the leftover vacation days for each user
+        for (User userToUpdate : usersMap.values()) {
+            Decimal leftoverVacationDays = leftoverVacationDaysMap.get(userToUpdate.Id);
+            userToUpdate.Leftover_Vacation__c = leftoverVacationDays;
+            // if (userToUpdate.Leftover_Vacation__c < 0) {
+            //     Leave_Application__c leaveApplication = new Leave_Application__c(User__c = userToUpdate.Id);
+            //     leaveApplication.addError('Leftover vacation days cannot exceed 30.');
+            // }
+            usersToUpdate.add(userToUpdate);
+        }
+        
+        update usersToUpdate;
+    }
+
+    // public static Integer getAllowedVacationDays() {
+
+    //     return [SELECT TotalVacationDaysPerYear__c 
+    //     FROM Leave_Policy_Config__mdt LIMIT 1].TotalVacationDaysPerYear__c.intValue();
+    // }
+
 }

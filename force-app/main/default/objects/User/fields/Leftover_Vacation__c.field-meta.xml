@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Leftover_Vacation__c</fullName>
+    <defaultValue>0</defaultValue>
+    <description>This is the leftover vacation based on the TotalVacationDaysPerYear__c field</description>
+    <externalId>false</externalId>
+    <label>Leftover Vacation</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

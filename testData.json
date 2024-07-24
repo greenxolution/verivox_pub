@@ -1,0 +1,32 @@
+[ {
+    "attributes" : {
+      "type" : "Leave_Application__c",
+      "url" : "/services/data/v61.0/sobjects/Leave_Application__c/a00ak00000FAp0mAAD"
+    },
+    "User__c" : "005ak000006OWjHAAW",
+    "Start_Date__c" : "2024-07-24",
+    "End_Date__c" : "2024-08-13",
+    "Status__c" : "Approved",
+    "Id" : "a00ak00000FAp0mAAD"
+  }, {
+    "attributes" : {
+      "type" : "Leave_Application__c",
+      "url" : "/services/data/v61.0/sobjects/Leave_Application__c/a00ak00000FAp0nAAD"
+    },
+    "User__c" : "005ak000006OWjHAAW",
+    "Start_Date__c" : "2024-08-13",
+    "End_Date__c" : "2024-09-02",
+    "Status__c" : "Approved",
+    "Id" : "a00ak00000FAp0nAAD"
+  }, {
+    "attributes" : {
+      "type" : "Leave_Application__c",
+      "url" : "/services/data/v61.0/sobjects/Leave_Application__c/a00ak00000FAp0oAAD"
+    },
+    "User__c" : "005ak000006OWjHAAW",
+    "Start_Date__c" : "2024-09-07",
+    "End_Date__c" : "2024-09-17",
+    "Status__c" : "Approved",
+    "Id" : "a00ak00000FAp0oAAD"
+  } ]
+  
