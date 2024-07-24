@@ -173,3 +173,125 @@ Here is a test class covering the above scenarios:
 ### Summary
 
 This test class covers a variety of scenarios for the `DurationCalculator` class, ensuring that it correctly calculates the number of working days while considering weekends, German holidays, and different date ranges. The `testSetup` method ensures that necessary data, such as German holidays, is set up before running the tests.
+
+-----------------------------------------------------------------------------------------------------------------
+To create a REST Webservice in Salesforce that accepts an employee email address and returns all leave applications for that email address in the current financial year, we need to perform the following steps:
+
+1. **Create the REST Webservice**.
+2. **Query leave applications based on the email address**.
+3. **Integrate with the ERP system to update the balance of vacation days whenever a leave application is approved**.
+
+### Step 1: Create the REST Webservice
+
+First, let's create an Apex class to handle the REST requests:
+
+```apex
+@RestResource(urlMapping='/LeaveApplications/*')
+global with sharing class LeaveApplicationService {
+    
+    @HttpGet
+    global static List<Leave_Application__c> getLeaveApplicationsByEmail() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
+        
+        String email = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
+        return queryLeaveApplications(email);
+    }
+    
+    private static List<Leave_Application__c> queryLeaveApplications(String email) {
+        // Get the current financial year
+        Date startOfYear = Date.newInstance(System.today().year(), 1, 1);
+        Date endOfYear = Date.newInstance(System.today().year(), 12, 31);
+        
+        // Query the user based on email
+        User user = [SELECT Id FROM User WHERE Email = :email LIMIT 1];
+        
+        if (user == null) {
+            return new List<Leave_Application__c>(); // Return empty list if user not found
+        }
+        
+        // Query leave applications for the user in the current financial year
+        List<Leave_Application__c> leaveApplications = [SELECT Id, Start_Date__c, End_Date__c, Status__c, Duration__c
+                                                        FROM Leave_Application__c
+                                                        WHERE User__c = :user.Id
+                                                        AND Start_Date__c >= :startOfYear
+                                                        AND End_Date__c <= :endOfYear];
+        
+        return leaveApplications;
+    }
+}
+```
+
+### Step 2: Query Leave Applications Based on Email Address
+
+In the code above, the `getLeaveApplicationsByEmail` method handles the GET request to the `/LeaveApplications/*` URL. It extracts the email address from the URL and then calls the `queryLeaveApplications` method to retrieve leave applications for the current financial year.
+
+### Step 3: Integrate with ERP System
+
+To ensure the ERP system's vacation day balance is updated whenever a new leave application is approved in Salesforce, we need to:
+
+1. **Create a trigger on the `Leave_Application__c` object**.
+2. **Send a request to the ERP system when a leave application is approved**.
+
+#### 3.1 Create a Trigger on Leave_Application__c
+
+```apex
+trigger LeaveApplicationTrigger on Leave_Application__c (after update) {
+    List<Leave_Application__c> approvedLeaveApplications = new List<Leave_Application__c>();
+    
+    for (Leave_Application__c leaveApp : Trigger.new) {
+        if (leaveApp.Status__c == 'Approved' && Trigger.oldMap.get(leaveApp.Id).Status__c != 'Approved') {
+            approvedLeaveApplications.add(leaveApp);
+        }
+    }
+    
+    if (!approvedLeaveApplications.isEmpty()) {
+        ERPIntegrationService.updateVacationBalance(approvedLeaveApplications);
+    }
+}
+```
+
+#### 3.2 Create a Class for ERP Integration
+
+```apex
+public class ERPIntegrationService {
+    
+    @future(callout=true)
+    public static void updateVacationBalance(List<Leave_Application__c> approvedLeaveApplications) {
+        for (Leave_Application__c leaveApp : approvedLeaveApplications) {
+            User user = [SELECT Id, Email FROM User WHERE Id = :leaveApp.User__c LIMIT 1];
+            
+            // Callout to ERP system to update vacation balance
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint('https://erp.example.com/api/updateVacationBalance');
+            req.setMethod('POST');
+            req.setHeader('Content-Type', 'application/json');
+            
+            // Create JSON payload
+            Map<String, Object> payload = new Map<String, Object>();
+            payload.put('email', user.Email);
+            payload.put('approvedLeaveDays', leaveApp.Duration__c);
+            
+            req.setBody(JSON.serialize(payload));
+            
+            Http http = new Http();
+            HttpResponse res = http.send(req);
+            
+            if (res.getStatusCode() != 200) {
+                System.debug('Failed to update ERP system: ' + res.getBody());
+            }
+        }
+    }
+}
+```
+
+In this setup:
+- The `LeaveApplicationTrigger` triggers on the `Leave_Application__c` object after an update and checks if any leave applications have been approved.
+- The `ERPIntegrationService` class contains a `@future` method `updateVacationBalance` which is called by the trigger to send an HTTP request to the ERP system to update the vacation balance.
+
+### Summary
+
+- **REST Webservice**: Accepts an employee email address and returns leave applications for the current financial year.
+- **Trigger**: Updates the ERP system whenever a leave application is approved in Salesforce.
+
+This ensures that leave applications are managed effectively within Salesforce and the ERP system is kept in sync.
