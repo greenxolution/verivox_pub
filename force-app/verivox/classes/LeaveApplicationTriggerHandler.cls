@@ -71,6 +71,9 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     private void handleAfterInsert(List<SObject> newRecords) {
         // Logic for after insert
         setLeftoverVacationField(newRecords);
+
+        sendUpdatToERP(newRecords);
+
     }
     
     private void handleBeforeUpdate(List<SObject> oldRecords, List<SObject> newRecords) {
@@ -80,6 +83,8 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     private void handleAfterUpdate(List<SObject> oldRecords, List<SObject> newRecords) {
         // Logic for after update
         setLeftoverVacationField(newRecords);
+
+        sendUpdatToERP(newRecords);
     }
     
     private void handleBeforeDelete(List<SObject> oldRecords) {
@@ -89,6 +94,8 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
     private void handleAfterDelete(List<SObject> oldRecords) {
         // Logic for after delete
         setLeftoverVacationField(oldRecords);
+
+        sendUpdatToERP(oldRecords);
     }
 
     @TestVisible
@@ -103,7 +110,24 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
         return [SELECT Id, MaximumLeaveDurationinDays__c, TotalVacationDaysPerYear__c FROM Leave_Policy_Config__mdt LIMIT 1];
     }
 
+    @TestVisible
+    private void sendUpdatToERP(List<Leave_Application__c> newRecords) {
+        if (Test.isRunningTest()) {
+            return;
+        }
 
+        Set<Id> userIds = new Set<Id>();
+        for (Leave_Application__c leaveApplication : newRecords) {
+            if (leaveApplication.Status__c == 'Approved') {
+                
+                userIds.add(leaveApplication.User__c);
+            }
+        }
+
+        if(userIds.size() > 0) {
+            ERPIntegrationService.updateVacationBalance(userIds);
+        }
+    }
 
     // Set User.Leftover_Vacation__c in insert, update and delete scenarios
     @TestVisible
@@ -168,11 +192,5 @@ public with sharing class LeaveApplicationTriggerHandler implements ITriggerHand
         
         update usersToUpdate;
     }
-
-    // public static Integer getAllowedVacationDays() {
-
-    //     return [SELECT TotalVacationDaysPerYear__c 
-    //     FROM Leave_Policy_Config__mdt LIMIT 1].TotalVacationDaysPerYear__c.intValue();
-    // }
 
 }

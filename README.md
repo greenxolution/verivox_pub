@@ -416,3 +416,173 @@ private class ERPIntegrationServiceTest {
     - Check the request payload to ensure it contains the correct user information.
 
 This unit test ensures that the `updateVacationBalance` method correctly processes the user data and makes the appropriate HTTP callout to the ERP system.
+
+----------------------------------------------------------------------------------------------
+Here's how you can implement a Lightning Web Component (LWC) for creating an "Application for Leave" on the Home Page with the requirements you specified:
+
+### 1. Component Structure
+
+1. **HTML Template** (`leaveApplicationComponent.html`):
+   - This file defines the UI of the component.
+   - It includes input fields for start date, end date, and type, and displays the current balance of vacation days.
+
+2. **JavaScript Controller** (`leaveApplicationComponent.js`):
+   - This file handles the logic for interacting with Salesforce data, including sending the application, showing toast messages, and clearing the fields.
+
+3. **Apex Controller** (`LeaveApplicationController.cls`):
+   - This Apex class handles server-side logic for saving the leave application and fetching the current balance of vacation days.
+
+### 2. HTML Template (`leaveApplicationComponent.html`)
+
+```html
+<template>
+    <lightning-card title="Apply for Leave">
+        <div class="slds-p-around_medium">
+            <lightning-combobox
+                name="type"
+                label="Leave Type"
+                value={leaveType}
+                placeholder="Select Leave Type"
+                options={leaveTypeOptions}
+                onchange={handleTypeChange}
+                required>
+            </lightning-combobox>
+
+            <lightning-input
+                type="date"
+                name="startDate"
+                label="Start Date"
+                value={startDate}
+                onchange={handleStartDateChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="date"
+                name="endDate"
+                label="End Date"
+                value={endDate}
+                onchange={handleEndDateChange}
+                required>
+            </lightning-input>
+
+            <p>Current Vacation Balance: {vacationBalance} days</p>
+
+            <lightning-button
+                variant="neutral"
+                label="Submit"
+                onclick={handleSubmit}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>
+```
+
+### 3. JavaScript Controller (`leaveApplicationComponent.js`)
+
+```javascript
+import { LightningElement, track, api } from 'lwc';
+import saveLeaveApplication from '@salesforce/apex/LeaveApplicationController.saveLeaveApplication';
+import getVacationBalance from '@salesforce/apex/LeaveApplicationController.getVacationBalance';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+export default class LeaveApplicationComponent extends LightningElement {
+    @track leaveType;
+    @track startDate;
+    @track endDate;
+    @track vacationBalance;
+
+    leaveTypeOptions = [
+        { label: 'Vacation', value: 'Vacation' },
+        { label: 'Business Trip', value: 'Business Trip' },
+        { label: 'Other', value: 'Other' }
+    ];
+
+    connectedCallback() {
+        this.fetchVacationBalance();
+    }
+
+    handleTypeChange(event) {
+        this.leaveType = event.detail.value;
+    }
+
+    handleStartDateChange(event) {
+        this.startDate = event.detail.value;
+    }
+
+    handleEndDateChange(event) {
+        this.endDate = event.detail.value;
+    }
+
+    handleSubmit() {
+        if (this.startDate && this.endDate && this.leaveType) {
+            saveLeaveApplication({ startDate: this.startDate, endDate: this.endDate, leaveType: this.leaveType })
+                .then(() => {
+                    this.showToast('Success', 'Leave application submitted successfully', 'success');
+                    this.clearFields();
+                })
+                .catch(error => {
+                    this.showToast('Error', 'Failed to submit leave application', 'error');
+                });
+        } else {
+            this.showToast('Error', 'Please fill in all required fields', 'error');
+        }
+    }
+
+    fetchVacationBalance() {
+        getVacationBalance()
+            .then(result => {
+                this.vacationBalance = result;
+            })
+            .catch(error => {
+                this.showToast('Error', 'Failed to fetch vacation balance', 'error');
+            });
+    }
+
+    clearFields() {
+        this.leaveType = '';
+        this.startDate = '';
+        this.endDate = '';
+    }
+
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(event);
+    }
+}
+```
+
+### 4. Apex Controller (`LeaveApplicationController.cls`)
+
+```java
+public with sharing class LeaveApplicationController {
+    @AuraEnabled
+    public static void saveLeaveApplication(Date startDate, Date endDate, String leaveType) {
+        Leave_Application__c leaveApplication = new Leave_Application__c(
+            Start_Date__c = startDate,
+            End_Date__c = endDate,
+            Type__c = leaveType,
+            Status__c = 'Pending' // or the appropriate default status
+        );
+        insert leaveApplication;
+    }
+
+    @AuraEnabled
+    public static Decimal getVacationBalance() {
+        User currentUser = [SELECT Id, Leftover_Vacation__c FROM User WHERE Id = :UserInfo.getUserId()];
+        return currentUser.Leftover_Vacation__c;
+    }
+}
+```
+
+### Summary:
+
+- **Component HTML**: Defines the UI with mandatory fields and dynamic picklist.
+- **JavaScript Controller**: Handles the logic for submitting the leave application and showing toast messages.
+- **Apex Controller**: Manages server-side operations for saving the leave application and fetching vacation balance.
+
+This setup allows you to create a leave application directly from the Home Page, with dynamic field handling and feedback through toast messages.

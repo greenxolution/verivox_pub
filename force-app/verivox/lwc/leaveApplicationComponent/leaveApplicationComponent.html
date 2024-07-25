@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Apply for Leave">
+        <div class="slds-p-around_medium">
+            <lightning-combobox name="type" label="Leave Type" value={leaveType} placeholder="Select Leave Type"
+                options={leaveTypeOptions} onchange={handleTypeChange} required>
+            </lightning-combobox>
+
+            <lightning-input type="date" name="startDate" label="Start Date" value={startDate}
+                onchange={handleStartDateChange} required>
+            </lightning-input>
+
+            <lightning-input type="date" name="endDate" label="End Date" value={endDate} onchange={handleEndDateChange}
+                required>
+            </lightning-input>
+            
+            <lightning-input type="text" name="user" label="User" value={user} onchange={handleUserChange} required>
+            </lightning-input>
+            <p>Current Vacation Balance: {vacationBalance} days</p>
+
+            <lightning-button variant="neutral" label="Submit" onclick={handleSubmit}>
+            </lightning-button>
+        </div>
+        <div class="slds-p-around_medium">
+            <div style="height: 300px;">
+                <lightning-datatable key-field="id" data={leaveApplications} columns={columns}>
+                </lightning-datatable>
+            </div>
+        </div>
+    </lightning-card>
+</template>
