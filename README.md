@@ -2,7 +2,9 @@
 
 ## Metadata
 
-`Leave_Application__c.object` XML, here's a table summarizing the field names, types, and descriptions:
+### Custom Objects
+
+`Leave_Application__c.object` Custom Object. This stores the Leave Application records
 
 | Field Name       | Field Type | Description                                                                                   |
 |------------------|------------|-----------------------------------------------------------------------------------------------|
@@ -15,9 +17,72 @@
 | User__c          | Lookup     | This is the affected user of the Leave Record                                                  |
 | Year__c          | Text       | Formula field to determine if the leave period is in the current year                          |
 
-This table captures the key attributes for each field as defined in the XML. If you need more detailed information or additional fields, please let me know.
+`German_Holiday__mdt` Custom Metadata. This stores the Germany holidays per year.
 
-### Test Scenarios
+| Field Name       | Field Type | Description                                    |
+|------------------|------------|------------------------------------------------|
+| Holiday_Date__c  | Date       | The date of the public holiday.                |
+| Holiday_Name__c  | Text       | The name of the public holiday.                |
+
+`Leave Policy Config` XML, This stores the application configuration.
+
+| Field Name                     | Field Type | Description                                                                                                                        |
+|--------------------------------|------------|------------------------------------------------------------------------------------------------------------------------------------|
+| ERPIntegrationServiceURL__c    | Text       | ERP Integration Service URL                                                                                                        |
+| MaximumLeaveDurationinDays__c  | Number     | Defines the maximum number of calendar weeks an employee can take off in a single leave request. Example: 3 weeks = 21 days.       |
+| TotalVacationDaysPerYear__c    | Number     | Specifies the total number of vacation days each employee is entitled to per year. Example: 30 days of vacation per year.         |
+
+### Permission Set
+
+"Leave Application Users" permission set provides specific access permissions to the "Leave Application" records and some user fields. 
+
+### Description:
+This permission set provides access to Leave Application records. It includes field-level and object-level permissions for the "Leave_Application__c" object and a specific user field.
+
+### Field Permissions:
+1. **Leave_Application__c.Duration__c**
+   - Editable: Yes
+   - Readable: Yes
+
+2. **Leave_Application__c.IsActive__c**
+   - Editable: No
+   - Readable: Yes
+
+3. **Leave_Application__c.Status__c**
+   - Editable: Yes
+   - Readable: Yes
+
+4. **Leave_Application__c.Type__c**
+   - Editable: Yes
+   - Readable: Yes
+
+5. **Leave_Application__c.User__c**
+   - Editable: Yes
+   - Readable: Yes
+
+6. **Leave_Application__c.Year__c**
+   - Editable: No
+   - Readable: Yes
+
+7. **User.Leftover_Vacation__c**
+   - Editable: Yes
+   - Readable: Yes
+
+### Object Permissions for Leave_Application__c:
+- Allow Create: No
+- Allow Delete: Yes
+- Allow Edit: Yes
+- Allow Read: Yes
+- Modify All Records: Yes
+- View All Records: Yes
+
+### Summary:
+- **Purpose:** To manage access to Leave Application records and relevant fields.
+- **Field-Level Access:** Provides specific read and edit permissions on the fields of the "Leave_Application__c" object.
+- **Object-Level Access:** Grants comprehensive permissions on the "Leave_Application__c" object, including read, edit, and delete capabilities, as well as the ability to view and modify all records.
+- **User Field Access:** Allows editing and reading the "Leftover_Vacation__c" field on the User object.
+
+## Test Scenarios
 
 1. **Date in the Past:**
    - **Scenario:** Attempt to set a leave request start date in the past.
