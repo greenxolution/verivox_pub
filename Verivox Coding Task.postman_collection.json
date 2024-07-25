@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "aaab89d3-9d8f-4e2f-9b59-1d18352bf275",
+		"name": "Verivox Coding Task",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5881734"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set(\"access_token\", jsonData.access_token);\r",
+							"pm.collectionVariables.set(\"instance_url\", jsonData.instance_url);\r",
+							"console.log(JSON.stringify(jsonData))\r",
+							"console.log(jsonData.access_token)\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "headerPrefix",
+							"value": "Bearer {{access_token}}",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client_id}}"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}"
+						},
+						{
+							"key": "username",
+							"value": "verivoxdevabc@verivox.com.abc",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "VerivoxF478!-97dxnB02MA1IctMjx3IFhioFF",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.salesforce.com/services/oauth2/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"salesforce",
+						"com"
+					],
+					"path": [
+						"services",
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client_id}}"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{client_secret}}"
+						},
+						{
+							"key": "username",
+							"value": "properties@calpemar.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "MiamiFlorida123GKdQ9V14ALUNMAcgOworZ4p3i",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{instance_url}}/services/apexrest/leaveapplications?email=araujo.guntin@gmail.com",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"apexrest",
+						"leaveapplications"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "araujo.guntin@gmail.com"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{_accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "client_id",
+			"value": "3MVG9JJwBBbcN47IqTOJeKolN3Zvmrcbr_mYA1j3lp1PR2uCeYyBpvgn5d.5biEQaQDPrEmaZfqgyxCXWTAQQ",
+			"type": "string"
+		},
+		{
+			"key": "client_secret",
+			"value": "F27367071C0BD0C09F92BC25A7B5333E255650B9458D0D6B6866D2F36278E3DB",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "instance_url",
+			"value": ""
+		}
+	]
+}
