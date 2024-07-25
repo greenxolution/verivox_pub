@@ -1,23 +1,21 @@
-# Salesforce DX Project: Next Steps
+# Verivox - Your Coding Task, Salesforce DX Project
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+## Metadata
 
-## How Do You Plan to Deploy Your Changes?
+`Leave_Application__c.object` XML, here's a table summarizing the field names, types, and descriptions:
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+| Field Name       | Field Type | Description                                                                                   |
+|------------------|------------|-----------------------------------------------------------------------------------------------|
+| Duration__c      | Number     | This field contains the duration                                                              |
+| End_Date__c      | Date       | Specifies the end date of the leave period                                                     |
+| IsActive__c      | Checkbox   | Active if the start and end date are in the current year                                       |
+| Start_Date__c    | Date       | Specifies the start date of the leave period. Validation rules ensure that the start date cannot be set in the past |
+| Status__c        | Picklist   | A picklist field to track the status of the leave application (Draft, In Progress, Approved, Not Approved). The default status is "Draft," which is read-only |
+| Type__c          | Text       | A text field to specify the type of leave (e.g., vacation, sick leave, parental leave)         |
+| User__c          | Lookup     | This is the affected user of the Leave Record                                                  |
+| Year__c          | Text       | Formula field to determine if the leave period is in the current year                          |
 
-## Configure Your Salesforce DX Project
-
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
-
-## Read All About It
-
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
-
-Here are detailed test scenarios and steps to automate the validation of the requirements for leave management, including Salesforce automation and integration:
+This table captures the key attributes for each field as defined in the XML. If you need more detailed information or additional fields, please let me know.
 
 ### Test Scenarios
 
