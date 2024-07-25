@@ -8,16 +8,12 @@ public with sharing class LeaveApplicationTriggerHandlerTest {
     @TestSetup
     static void setupTestData() {
 
-        String baseUsername = 'testuser';
-        String uniqueUsername1 = baseUsername + String.valueOf(Math.abs(Crypto.getRandomInteger())) + '@example.com';
-        String uniqueUsername2 = baseUsername + String.valueOf(Math.abs(Crypto.getRandomInteger())) + '@example.com';
-
         // Insert Users
         user1 = new User(
             FirstName = 'Test',
             LastName = 'User1',
             Email = 'testuser1@example.com',
-            Username = uniqueUsername1,
+            Username = getDynamicUsername(),
             Alias = 'tuser1',
             TimeZoneSidKey = 'America/Los_Angeles',
             LocaleSidKey = 'en_US',
@@ -31,7 +27,7 @@ public with sharing class LeaveApplicationTriggerHandlerTest {
             FirstName = 'Test',
             LastName = 'User2',
             Email = 'testuser2@example.com',
-            Username = uniqueUsername2,
+            Username = getDynamicUsername(),
             Alias = 'tuser2',
             TimeZoneSidKey = 'America/Los_Angeles',
             LocaleSidKey = 'en_US',
@@ -175,14 +171,11 @@ public with sharing class LeaveApplicationTriggerHandlerTest {
     @isTest
     static void testSetLeftoverVacationField_Insert() {
 
-        String baseUsername = 'testuser';
-        String uniqueUsername1 = baseUsername + String.valueOf(Math.abs(Crypto.getRandomInteger())) + '@example.com';
-
         User newUser = new User(
             FirstName = 'John',
             LastName = 'Doe',
             Email = 'johndoe@example.com',
-            Username = uniqueUsername1,
+            Username = getDynamicUsername(),
             Alias = 'JD',
             TimeZoneSidKey = 'America/Los_Angeles',
             LocaleSidKey = 'en_US',
@@ -281,15 +274,12 @@ public with sharing class LeaveApplicationTriggerHandlerTest {
     @IsTest
     static void testUpdateUsersLeftoverVacationDays() {
 
-        String baseUsername = 'testuser';
-        String uniqueUsername1 = baseUsername + String.valueOf(Math.abs(Crypto.getRandomInteger())) + '@example.com';
-
         // Setup test data
         User user1 = new User(
             FirstName = 'John',
             LastName = 'Doe',
             Email = 'johndoe@example.com',
-            Username = uniqueUsername1,
+            Username = getDynamicUsername(),
             Alias = 'JD',
             TimeZoneSidKey = 'America/Los_Angeles',
             LocaleSidKey = 'en_US',
@@ -395,5 +385,9 @@ public with sharing class LeaveApplicationTriggerHandlerTest {
         // Output the total duration
         System.debug('Total Duration: ' + totalDuration);
 
+    }
+
+    static String getDynamicUsername() {
+        return 'testuser' + System.currentTimeMillis() + '@example.com';
     }
 }
